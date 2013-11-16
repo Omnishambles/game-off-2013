@@ -37,7 +37,7 @@ public class CarSystem : MonoBehaviour
     }
 
     // Update is called once per frame while the object is alive.
-	private void Update()
+    private void Update()
     {
         // Only spawn and move a new car once every random interval,
         // between 0.5 and 2.0 seconds.
@@ -51,7 +51,7 @@ public class CarSystem : MonoBehaviour
         // Get a random path that this car will take.
         Vector3[] path = RandomPath();
         // Create a new car object.
-	    GameObject newCar = SpawnCar();
+        GameObject newCar = SpawnCar();
         // Set its initial position (first position on the path).
         newCar.transform.position = path[0];
 
@@ -63,7 +63,7 @@ public class CarSystem : MonoBehaviour
 
         // Save the current time as the last spawn time.
         _lastSpawnTime = Time.time;
-	}
+    }
 
     private GameObject SpawnCar()
     {
