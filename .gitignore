@@ -10,7 +10,9 @@
 # Unity3D
 Library/
 Build/
-Temp/*
+Temp
+*.csproj
+*.sln
 __MACOSX
 
 # Monodevelop
