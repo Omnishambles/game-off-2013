@@ -1,0 +1,24 @@
+# OS X
+.DS_Store
+
+# Emacs backup/temporary files
+*.~*~
+\#*\#
+.*.~*~
+.\#*
+
+# Unity3D
+Library/
+Build/
+Temp/*
+__MACOSX
+
+# Monodevelop
+Assembly-CSharp.pidb
+*.userprefs
+
+# Visual Studio
+*.suo
+*.user
+*.pidb
+obj/
