@@ -10,7 +10,7 @@
 # Unity3D
 Library/
 Build/
-Temp/*
+Temp
 __MACOSX
 
 # Monodevelop
