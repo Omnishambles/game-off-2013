@@ -3,6 +3,7 @@ using System.Collections;
 
 public class ArmSystem : MonoBehaviour {
 
+    public Traffic trafficControl;
 	public GameObject leftArm;
 	public GameObject rightArm;
 
@@ -28,13 +29,20 @@ public class ArmSystem : MonoBehaviour {
 	string heldKeyRight;
 
 	void RaiseArm(Vector3 position, Vector3 rotation, string keypress, GameObject arm) {
+        // Get traffic lane by key press.
+        TrafficLane lane = LaneForKey(keypress);
+
 		if (arm == leftArm) {
 			heldKeyLeft = keypress;
 			leftRaised = true;
+            trafficControl.SetOriginLane(lane);
 		}
 		else {
 			heldKeyRight = keypress;
+            trafficControl.SetDestinationLane(lane);
 		}
+        
+        
 		iTween.MoveTo (arm, iTween.Hash ("position", position,
 		                                        "time", 1.0f,
 		                                        "islocal", true));
@@ -45,10 +53,12 @@ public class ArmSystem : MonoBehaviour {
 
 	void LowerArm(GameObject arm) {
 		if (arm == leftArm) {
+            trafficControl.SetOriginLane(TrafficLane.None);
 			heldKeyLeft = null;
 			leftRaised = false;
 		}
 		else {
+            trafficControl.SetDestinationLane(TrafficLane.None);
 			heldKeyRight = null;
 		}
 		iTween.MoveTo (arm, iTween.Hash ("position", loweredPosition,
@@ -77,7 +87,6 @@ public class ArmSystem : MonoBehaviour {
 	void Update () {
 
 		GameObject arm = leftRaised ? rightArm : leftArm;
-		Debug.Log (arm);
 
 		if(Input.GetKeyDown(northKey)) {
 			RaiseArm(raisedPositionNorth,raisedRotationNorth,northKey,arm);
@@ -100,6 +109,13 @@ public class ArmSystem : MonoBehaviour {
 
 	}
 
-
+    private TrafficLane LaneForKey(string key)
+    {
+        if (key == northKey) return TrafficLane.North;
+        if (key == southKey) return TrafficLane.South;
+        if (key == westKey) return TrafficLane.West;
+        if (key == eastKey) return TrafficLane.East;
+        return TrafficLane.None;
+    }
 
 }

@@ -116,8 +116,9 @@ public class Traffic : MonoBehaviour
     }
 
     // Traffic lane status accessors.
-    public void RemoveCarFromLane(TrafficLane lane, Car car)
+    public void RemoveCar(Car car)
     {
+        TrafficLane lane = car.Lane;
         _carsInLane[lane].Remove(car);
     }
 
@@ -135,12 +136,11 @@ public class Traffic : MonoBehaviour
     {
         _openDestinationLane = lane;
 
-        if (_openOriginLane != TrafficLane.None)
+        if (_openOriginLane != TrafficLane.None && lane != TrafficLane.None)
         {
             var path = PathBetweenLanes(_openOriginLane, lane);
             foreach (Car car in _carsInLane[_openOriginLane])
             {
-                Debug.Log("Setting new path on cars");
                 car.Path = path;
             }
         }
@@ -151,7 +151,7 @@ public class Traffic : MonoBehaviour
         float distSq = float.MaxValue;
         Vector3 carPos = car.gameObject.transform.position;
         // First check the lane block if the lane isn't open.
-        if (car.Lane != _openOriginLane)
+        if (car.Lane != _openOriginLane || _openDestinationLane == TrafficLane.None)
         {
             GameObject block = _laneBlocks[car.Lane];
             distSq = (carPos - block.transform.position).sqrMagnitude;
@@ -197,6 +197,8 @@ public class Traffic : MonoBehaviour
         {
             return matchingPath.nodes.ToArray();
         }
+
+        Debug.Log("Null path between " + pathName);
 
         return null;
     }

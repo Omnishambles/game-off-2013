@@ -53,25 +53,24 @@ public class Car : MonoBehaviour
     
     private void FixedUpdate()
     {
-        if (_isMoving)
+        float moveAmount = this.Traffic.MovementAmountForCar(this);
+        if (moveAmount <= 0.0f)
         {
-            float moveAmount = this.Traffic.MovementAmountForCar(this);
-            if (moveAmount <= 0.0f)
-            {
-                return;
-            }
-
-            _percentAcrossPath += moveAmount;
-            Vector3 pointOnPath = iTween.PointOnPath(Path, _percentAcrossPath);
-            rigidbody.MovePosition(pointOnPath);
+            return;
         }
+
+        _percentAcrossPath += moveAmount;
+        Vector3 pointOnPath = iTween.PointOnPath(Path, _percentAcrossPath);
+        rigidbody.MovePosition(pointOnPath);
 
         // Now check if we've moved past the end of the path.
         // This is when the car should move to the other intersection.
         // For now, just destroy it.
         if (_percentAcrossPath > 1.0f)
         {
+            this.Traffic.RemoveCar(this);
             GameObject.Destroy(this.gameObject);
+            
         }
     }
 
