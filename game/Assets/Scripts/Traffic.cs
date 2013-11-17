@@ -198,8 +198,6 @@ public class Traffic : MonoBehaviour
             return matchingPath.nodes.ToArray();
         }
 
-        Debug.Log("Null path between " + pathName);
-
         return null;
     }
 
