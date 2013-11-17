@@ -11,6 +11,8 @@
 Library/
 Build/
 Temp
+*.csproj
+*.sln
 __MACOSX
 
 # Monodevelop
