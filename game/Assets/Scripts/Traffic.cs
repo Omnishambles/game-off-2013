@@ -1,4 +1,4 @@
-using UnityEngine;
+ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,7 +67,6 @@ public class Traffic : MonoBehaviour
 
         // Get a random path that this car will take.
         TrafficLane lane = RandomLane();
-        var asdf = PathBetweenLanes(lane, TrafficLane.None);
         Vector3[] path = RandomPathInLane(lane);
 
         if (lane == _openOriginLane && _openDestinationLane != TrafficLane.None)

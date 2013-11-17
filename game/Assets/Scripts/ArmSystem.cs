@@ -62,15 +62,15 @@ public class ArmSystem : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		loweredPosition = new Vector3 (0, 0, 0);
-		raisedPositionNorth = new Vector3(-0.5f, 0.2f, 0);
-		raisedPositionEast = new Vector3(0, 0.2f, 0.5f);
-		raisedPositionSouth = new Vector3(0.5f, 0.2f, 0);
-		raisedPositionWest = new Vector3(0, 0.2f, -0.5f);
+		raisedPositionEast = new Vector3(-0.5f, 0.2f, 0);
+		raisedPositionSouth = new Vector3(0, 0.2f, 0.5f);
+		raisedPositionWest = new Vector3(0.5f, 0.2f, 0);
+		raisedPositionNorth = new Vector3(0, 0.2f, -0.5f);
 		loweredRotation = new Vector3(0, 0, 0);
-		raisedRotationNorth = new Vector3(0, 0, -90);
-		raisedRotationEast = new Vector3(-90, 0, 0);
-		raisedRotationSouth = new Vector3(0, 0, 90);
-        raisedRotationWest = new Vector3(90, 0, 0);
+		raisedRotationEast = new Vector3(0, 0, -90);
+		raisedRotationSouth = new Vector3(-90, 0, 0);
+		raisedRotationWest = new Vector3(0, 0, 90);
+        raisedRotationNorth = new Vector3(90, 0, 0);
 	}
 
 	// Update is called once per frame
