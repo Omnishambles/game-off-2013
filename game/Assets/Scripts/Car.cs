@@ -5,6 +5,7 @@ public class Car : MonoBehaviour
 {
     private float _percentAcrossPath;
     private bool _isMoving;
+	//public GameObject _car;
 
     // Properties
     public Traffic Traffic
@@ -37,13 +38,16 @@ public class Car : MonoBehaviour
         set;
     }
 
+    /*
     public static GameObject Create()
     {
-        GameObject car = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //GameObject car = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+		GameObject car = (GameObject)Instantiate(_car);
         car.AddComponent<Car>();
         car.AddComponent<Rigidbody>();
         return car;
     }
+	 */
     
     private void Start()
     {

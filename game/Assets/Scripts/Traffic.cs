@@ -23,6 +23,8 @@ public class Traffic : MonoBehaviour
     private TrafficLane _openDestinationLane;
     private Dictionary<TrafficLane, List<Car>> _carsInLane;
 
+	public GameObject _car;
+
     private void Start()
     {
         _openOriginLane = TrafficLane.None;
@@ -100,7 +102,11 @@ public class Traffic : MonoBehaviour
     private GameObject SpawnCar()
     {
         // For now, we're just creating a cube.
-        return Car.Create();
+        //return Car.Create();
+		GameObject car = (GameObject)Instantiate(_car);
+		car.AddComponent<Car>();
+		car.AddComponent<Rigidbody>();
+		return car;
     }
 
     private TrafficLane RandomLane()
