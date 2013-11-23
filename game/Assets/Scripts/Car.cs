@@ -48,13 +48,13 @@ public class Car : MonoBehaviour
         return car;
     }
 	 */
-    
+
     private void Start()
     {
         _percentAcrossPath = 0.02f;
         _isMoving = true;
     }
-    
+
     private void FixedUpdate()
     {
         float moveAmount = this.Traffic.MovementAmountForCar(this);
@@ -72,10 +72,15 @@ public class Car : MonoBehaviour
         // For now, just destroy it.
         if (_percentAcrossPath > 1.0f)
         {
-            this.Traffic.RemoveCar(this);
-            GameObject.Destroy(this.gameObject);
-            
+            carLeave();
         }
+    }
+
+    private void carLeave()
+    {
+        this.Traffic.RemoveCar(this);
+        GameObject.Destroy(this.gameObject);
+        Score.updateScore(1);
     }
 
     private void OnCollisionEnter(Collision collision)
