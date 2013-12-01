@@ -71,10 +71,7 @@ public class Traffic : MonoBehaviour
         TrafficLane lane = RandomLane();
         Vector3[] path = StartPathInLane(lane);
 
-        if (lane == _openOriginLane && _openDestinationLane != TrafficLane.None)
-        {
-            path = PathBetweenLanes(_openOriginLane, _openDestinationLane);
-        }
+        
 
         // Create a new car object and assign it's lane and front car.
         GameObject newCar = SpawnCar();
@@ -94,6 +91,12 @@ public class Traffic : MonoBehaviour
         // Set its initial position (first position on the path).
         newCar.transform.position = path[0];
         carComponent.SetInitialPath(path);
+
+        if (lane == _openOriginLane && _openDestinationLane != TrafficLane.None)
+        {
+            Vector3[] finalPath = PathBetweenLanes(_openOriginLane, _openDestinationLane);
+            carComponent.SetFinalPath(finalPath);
+        }
 
         // Save the current time as the last spawn time.
         _lastSpawnTime = Time.time;

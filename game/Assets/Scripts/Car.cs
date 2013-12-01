@@ -71,14 +71,14 @@ public class Car : MonoBehaviour
 
     private void FixedUpdate()
     {
-        float moveAmount = this.Traffic.MovementAmountForCar(this);
-        if (moveAmount <= 0.0f)
+        if (!_started)
         {
             if (_initialPath != null)
             {
                 StartPath(_initialPath);
                 _started = true;
             }
+
         }
 
         if (!this.Traffic.CanCarMove(this))
