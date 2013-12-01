@@ -3,9 +3,14 @@ using System.Collections;
 
 public class Car : MonoBehaviour
 {
+    private bool _started;
     private float _percentAcrossPath;
     private bool _isMoving;
-	//public GameObject _car;
+    private Vector3[] _initialPath;
+    private Vector3[] _finalPath;
+    private bool _onFinalPath;
+
+    private string _tweenId;
 
     // Properties
     public Traffic Traffic
@@ -32,10 +37,19 @@ public class Car : MonoBehaviour
         set;
     }
 
-    public Vector3[] Path
+    public void SetInitialPath(Vector3[] path)
     {
-        get;
-        set;
+        _initialPath = path;
+    }
+
+    public void SetFinalPath(Vector3[] path)
+    {
+        _finalPath = path;
+    }
+
+    public bool IsOnFinalPath()
+    {
+        return _onFinalPath;
     }
 
     /*
@@ -49,37 +63,55 @@ public class Car : MonoBehaviour
     }
 	 */
     
-    private void Start()
+    private void Update()
     {
-        _percentAcrossPath = 0.02f;
-        _isMoving = true;
-    }
-    
-    private void FixedUpdate()
-    {
-        float moveAmount = this.Traffic.MovementAmountForCar(this);
-        if (moveAmount <= 0.0f)
+        if (!_started)
         {
-            return;
+            if (_initialPath != null)
+            {
+                StartPath(_initialPath);
+                _started = true;
+            }
         }
 
-        _percentAcrossPath += moveAmount;
-        Vector3 pointOnPath = iTween.PointOnPath(Path, _percentAcrossPath);
-        rigidbody.MovePosition(pointOnPath);
-
-        // Now check if we've moved past the end of the path.
-        // This is when the car should move to the other intersection.
-        // For now, just destroy it.
-        if (_percentAcrossPath > 1.0f)
+        if (!this.Traffic.CanCarMove(this))
         {
-            this.Traffic.RemoveCar(this);
-            GameObject.Destroy(this.gameObject);
-            
+            _isMoving = false;
+            iTween.Pause(gameObject);
+        }
+        else if (_started && !_isMoving)
+        {
+            iTween.Resume(gameObject);
         }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         _isMoving = false;
+    }
+
+    private void StartPath(Vector3[] path)
+    {
+        iTween.MoveTo(gameObject, iTween.Hash(
+                          "easetype", "linear",
+                          "path", path,
+                          "time", 3.0f,
+                          "orienttopath", true,
+                          "onComplete", "FinishedPath"));
+    }
+
+    private void FinishedPath()
+    {
+        if (!_onFinalPath && _finalPath != null)
+        {
+            _onFinalPath = true;
+            StartPath(_finalPath);
+        }
+        else if (_onFinalPath)
+        {
+            Debug.Log("Car finished path");
+            this.Traffic.RemoveCar(this);
+            GameObject.Destroy(gameObject);
+        }
     }
 }

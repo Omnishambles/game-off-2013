@@ -69,7 +69,7 @@ public class Traffic : MonoBehaviour
 
         // Get a random path that this car will take.
         TrafficLane lane = RandomLane();
-        Vector3[] path = RandomPathInLane(lane);
+        Vector3[] path = StartPathInLane(lane);
 
         if (lane == _openOriginLane && _openDestinationLane != TrafficLane.None)
         {
@@ -93,7 +93,7 @@ public class Traffic : MonoBehaviour
         
         // Set its initial position (first position on the path).
         newCar.transform.position = path[0];
-        carComponent.Path = path;
+        carComponent.SetInitialPath(path);
 
         // Save the current time as the last spawn time.
         _lastSpawnTime = Time.time;
@@ -106,6 +106,7 @@ public class Traffic : MonoBehaviour
 		GameObject car = (GameObject)Instantiate(_car);
 		car.AddComponent<Car>();
 		car.AddComponent<Rigidbody>();
+        car.rigidbody.useGravity = false;
 		return car;
     }
 
@@ -147,9 +148,42 @@ public class Traffic : MonoBehaviour
             var path = PathBetweenLanes(_openOriginLane, lane);
             foreach (Car car in _carsInLane[_openOriginLane])
             {
-                car.Path = path;
+                if (!car.IsOnFinalPath())
+                {
+                    car.SetFinalPath(path);
+                }
             }
         }
+    }
+
+    public bool CanCarMove(Car car)
+    {
+        float distSq = float.MaxValue;
+        Vector3 carPos = car.gameObject.transform.position;
+        // First check the lane block if the lane isn't open.
+        if (car.Lane != _openOriginLane || _openDestinationLane == TrafficLane.None)
+        {
+            GameObject block = _laneBlocks[car.Lane];
+            distSq = (carPos - block.transform.position).sqrMagnitude;
+        }
+
+        // Check distance between car and car in front of it.
+        if (car.CarInFront != null)
+        {
+            Vector3 carInFrontPos = car.CarInFront.gameObject.transform.position;
+            float inFrontDist = (carPos - carInFrontPos).sqrMagnitude;
+            if (inFrontDist < distSq)
+            {
+                distSq = inFrontDist;
+            }
+        }
+
+        if (distSq < 10.0f)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public float MovementAmountForCar(Car car)
@@ -187,12 +221,17 @@ public class Traffic : MonoBehaviour
     public Vector3[] PathBetweenLanes(TrafficLane origin, TrafficLane destination)
     {
         string pathName = origin.ToString() + " to " + destination.ToString();
+        return FindPathByName(pathName, origin);
+    }
+
+    public Vector3[] FindPathByName(string name, TrafficLane origin)
+    {
         var lanePaths = _lanePaths[origin];
 
         iTweenPath matchingPath = null;
         foreach (iTweenPath path in lanePaths)
         {
-            if (path.pathName == pathName)
+            if (path.pathName == name)
             {
                 matchingPath = path;
                 break;
@@ -205,6 +244,12 @@ public class Traffic : MonoBehaviour
         }
 
         return null;
+    }
+
+    public Vector3[] StartPathInLane(TrafficLane origin)
+    {
+        string pathName = origin.ToString() + " to Intersection";
+        return FindPathByName(pathName, origin);
     }
 
     public bool OriginLaneSet()
