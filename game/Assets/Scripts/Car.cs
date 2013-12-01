@@ -1,6 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public enum Intersection
+{
+    Left,
+    Right
+}
+
 public class Car : MonoBehaviour
 {
     private bool _started;
@@ -14,6 +20,12 @@ public class Car : MonoBehaviour
     private string _tweenId;
 
     // Properties
+    public Intersection Intersection
+    {
+        get;
+        set;
+    }
+
     public Traffic Traffic
     {
         get;
@@ -41,11 +53,48 @@ public class Car : MonoBehaviour
     public void SetInitialPath(Vector3[] path)
     {
         _initialPath = path;
+
+        if (this.Intersection == Intersection.Right)
+        {
+            Vector3[] newPath = new Vector3[path.Length];
+            int i = 0;
+
+            foreach (Vector3 node in path)
+            {
+                newPath[i] = new Vector3(node.x - 51.96347f,
+                                         node.y,
+                                         node.z);
+                i++;
+            }
+
+            _initialPath = newPath;
+        }
     }
 
     public void SetFinalPath(Vector3[] path)
     {
         _finalPath = path;
+
+        if (this.Intersection == Intersection.Right)
+        {
+            Vector3[] newPath = new Vector3[path.Length];
+            int i = 0;
+
+            foreach (Vector3 node in path)
+            {
+                newPath[i] = new Vector3(node.x - 51.96347f,
+                                         node.y,
+                                         node.z);
+                i++;
+            }
+
+            _finalPath = newPath;
+        }
+    }
+
+    public void SetFirstPosition()
+    {
+        transform.position = _initialPath[0];
     }
 
     public bool IsOnFinalPath()
@@ -91,7 +140,7 @@ public class Car : MonoBehaviour
         {
             // Resume after 10 frames.
             _pauseFrameCount++;
-            if (_pauseFrameCount >= 10)
+            if (_pauseFrameCount >= 20)
             {
                 iTween.Resume(gameObject);
                 _pauseFrameCount = 0;
@@ -102,6 +151,7 @@ public class Car : MonoBehaviour
     private void carLeave()
     {
         this.Traffic.RemoveCar(this);
+        this.Traffic.SwitchCarIntersection(this);
         GameObject.Destroy(this.gameObject);
         Score.updateScore(1);
     }

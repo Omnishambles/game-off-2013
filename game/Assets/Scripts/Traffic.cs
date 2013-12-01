@@ -17,26 +17,60 @@ public class Traffic : MonoBehaviour
     private System.Random _random;
     private float _lastSpawnTime;
     private Dictionary<TrafficLane, Car> _lastCars;
+    private Dictionary<TrafficLane, Car> _lastCarsRight;
     private Dictionary<TrafficLane, iTweenPath[]> _lanePaths;
     private Dictionary<TrafficLane, GameObject> _laneBlocks;
+    private Dictionary<TrafficLane, GameObject> _rightLaneBlocks;
     private TrafficLane _openOriginLane;
     private TrafficLane _openDestinationLane;
+    private TrafficLane _openOriginLaneRight;
+    private TrafficLane _openDestinationLaneRight;
     private Dictionary<TrafficLane, List<Car>> _carsInLane;
+    private Dictionary<TrafficLane, List<Car>> _carsInLaneRight;
+    private int _maxCars = 5;
+    private int _currentCars = 0;
+    private float _lastIncreaseCarCountTime;
 
 	public GameObject _car;
+
+    public void IncreaseMaxCars()
+    {
+        _maxCars++;
+    }
+
+    public void SwitchCarIntersection(Car car)
+    {
+        if (car.Intersection == Intersection.Left)
+        {
+            SetNewCarOnIntersection(Intersection.Right);
+        }
+        else
+        {
+            SetNewCarOnIntersection(Intersection.Left);
+        }
+    }
 
     private void Start()
     {
         _openOriginLane = TrafficLane.None;
         _openDestinationLane = TrafficLane.None;
+        _openOriginLaneRight = TrafficLane.None;
+        _openDestinationLaneRight = TrafficLane.None;
         _lastCars = new Dictionary<TrafficLane, Car>();
+        _lastCarsRight = new Dictionary<TrafficLane, Car>();
         _lanePaths = new Dictionary<TrafficLane, iTweenPath[]>();
         _laneBlocks = new Dictionary<TrafficLane, GameObject>();
+        _rightLaneBlocks = new Dictionary<TrafficLane, GameObject>();
         _carsInLane = new Dictionary<TrafficLane, List<Car>>();
+        _carsInLaneRight = new Dictionary<TrafficLane, List<Car>>();
         _carsInLane[TrafficLane.North] = new List<Car>();
         _carsInLane[TrafficLane.South] = new List<Car>();
         _carsInLane[TrafficLane.East] = new List<Car>();
         _carsInLane[TrafficLane.West] = new List<Car>();
+        _carsInLaneRight[TrafficLane.North] = new List<Car>();
+        _carsInLaneRight[TrafficLane.South] = new List<Car>();
+        _carsInLaneRight[TrafficLane.East] = new List<Car>();
+        _carsInLaneRight[TrafficLane.West] = new List<Car>();
         _random = new System.Random();
 
         // Pull out iTweenPath arrays from their container objects.
@@ -54,10 +88,21 @@ public class Traffic : MonoBehaviour
         _laneBlocks[TrafficLane.South] = GameObject.Find("SouthBlock");
         _laneBlocks[TrafficLane.East] = GameObject.Find("EastBlock");
         _laneBlocks[TrafficLane.West] = GameObject.Find("WestBlock");
+
+        _rightLaneBlocks[TrafficLane.North] = GameObject.Find("NorthBlock 2");
+        _rightLaneBlocks[TrafficLane.South] = GameObject.Find("SouthBlock 2");
+        _rightLaneBlocks[TrafficLane.East] = GameObject.Find("EastBlock 2");
+        _rightLaneBlocks[TrafficLane.West] = GameObject.Find("WestBlock 2");
     }
 
     private void Update()
     {
+        if ((Time.time - _lastIncreaseCarCountTime) > 10.0f)
+        {
+            _maxCars++;
+            _lastIncreaseCarCountTime = Time.time;
+        }
+
         // Only spawn and move a new car once every random interval,
         // between 0.5 and 2.0 seconds.
         double dtAmount = (_random.NextDouble() * 2.0f) + 0.5f;
@@ -67,39 +112,65 @@ public class Traffic : MonoBehaviour
             return;
         }
 
+        if (_currentCars >= _maxCars)
+        {
+            return;
+        }
+
+        Intersection intersection = (Intersection)_random.Next(0, 2);
+        SetNewCarOnIntersection(intersection);
+        _currentCars++;
+        _lastSpawnTime = Time.time;
+    }
+
+    private void SetNewCarOnIntersection(Intersection intersection)
+    {
         // Get a random path that this car will take.
         TrafficLane lane = RandomLane();
         Vector3[] path = StartPathInLane(lane);
 
-        
+        Dictionary<TrafficLane, Car> lastCarsDict = null;
+        if (intersection == Intersection.Left)
+        {
+            lastCarsDict = _lastCars;
+        }
+        else
+        {
+            lastCarsDict = _lastCarsRight;
+        }
 
         // Create a new car object and assign it's lane and front car.
         GameObject newCar = SpawnCar();
         Car carComponent = newCar.GetComponent<Car>();
+        carComponent.Intersection = intersection;
         carComponent.Traffic = this;
         carComponent.Lane = lane;
-        _carsInLane[lane].Add(carComponent);
-
-        if (_lastCars.ContainsKey(lane))
+        if (intersection == Intersection.Left)
         {
-            _lastCars[lane].CarBehind = carComponent;
-            carComponent.CarInFront = _lastCars[lane];
+            _carsInLane[lane].Add(carComponent);
+        }
+        else
+        {
+            _carsInLaneRight[lane].Add(carComponent);
+        }
+
+        if (lastCarsDict.ContainsKey(lane))
+        {
+            lastCarsDict[lane].CarBehind = carComponent;
+            carComponent.CarInFront = lastCarsDict[lane];
         }
         
-        _lastCars[lane] = carComponent;
+        lastCarsDict[lane] = carComponent;
         
         // Set its initial position (first position on the path).
-        newCar.transform.position = path[0];
         carComponent.SetInitialPath(path);
+        carComponent.SetFirstPosition();
 
         if (lane == _openOriginLane && _openDestinationLane != TrafficLane.None)
         {
             Vector3[] finalPath = PathBetweenLanes(_openOriginLane, _openDestinationLane);
             carComponent.SetFinalPath(finalPath);
         }
-
-        // Save the current time as the last spawn time.
-        _lastSpawnTime = Time.time;
     }
 
     private GameObject SpawnCar()
@@ -137,19 +208,38 @@ public class Traffic : MonoBehaviour
         return (lane == _openOriginLane);
     }
 
-    public void SetOriginLane(TrafficLane lane)
+    public void SetOriginLane(Intersection intersection, TrafficLane lane)
     {
-        _openOriginLane = lane;
+        if (intersection == Intersection.Left)
+        {
+            _openOriginLane = lane;
+        }
+        else
+        {
+            _openOriginLaneRight = lane;
+        }
     }
 
-    public void SetDestinationLane(TrafficLane lane)
+    public void SetDestinationLane(Intersection intersection, TrafficLane lane)
     {
-        _openDestinationLane = lane;
-
-        if (_openOriginLane != TrafficLane.None && lane != TrafficLane.None)
+        Dictionary<TrafficLane, List<Car>> cars = null;
+        TrafficLane originLane = _openOriginLane;
+        if (intersection == Intersection.Left)
         {
-            var path = PathBetweenLanes(_openOriginLane, lane);
-            foreach (Car car in _carsInLane[_openOriginLane])
+            _openDestinationLane = lane;
+            cars = _carsInLane;
+        }
+        else
+        {
+            _openDestinationLaneRight = lane;
+            cars = _carsInLaneRight;
+            originLane = _openOriginLaneRight;
+        }
+
+        if (originLane != TrafficLane.None && lane != TrafficLane.None)
+        {
+            var path = PathBetweenLanes(originLane, lane);
+            foreach (Car car in cars[originLane])
             {
                 if (!car.IsOnFinalPath())
                 {
@@ -163,10 +253,28 @@ public class Traffic : MonoBehaviour
     {
         float distSq = float.MaxValue;
         Vector3 carPos = car.gameObject.transform.position;
-        // First check the lane block if the lane isn't open.
-        if (car.Lane != _openOriginLane || _openDestinationLane == TrafficLane.None)
+        TrafficLane openOriginLane = _openOriginLane;
+        TrafficLane openDestLane = _openDestinationLane;
+
+        if (car.Intersection == Intersection.Right)
         {
-            GameObject block = _laneBlocks[car.Lane];
+            openOriginLane = _openOriginLaneRight;
+            openDestLane = _openDestinationLaneRight;
+        }
+
+        // First check the lane block if the lane isn't open.
+        if (car.Lane != openOriginLane || openDestLane == TrafficLane.None)
+        {
+            GameObject block = null;
+            if (car.Intersection == Intersection.Left)
+            {
+                block = _laneBlocks[car.Lane];
+            }
+            else
+            {
+                block = _rightLaneBlocks[car.Lane];
+            }
+            
             distSq = (carPos - block.transform.position).sqrMagnitude;
         }
 

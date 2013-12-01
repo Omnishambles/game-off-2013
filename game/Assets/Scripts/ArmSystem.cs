@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class ArmSystem : MonoBehaviour {
-
+    public Intersection _intersection = Intersection.Left;
     public Traffic trafficControl;
 	public GameObject leftArm;
 	public GameObject rightArm;
@@ -35,11 +35,11 @@ public class ArmSystem : MonoBehaviour {
 		if (arm == leftArm) {
 			heldKeyLeft = keypress;
 			leftRaised = true;
-            trafficControl.SetOriginLane(lane);
+            trafficControl.SetOriginLane(_intersection, lane);
 		}
 		else {
 			heldKeyRight = keypress;
-            trafficControl.SetDestinationLane(lane);
+            trafficControl.SetDestinationLane(_intersection, lane);
 		}
         
         
@@ -53,12 +53,12 @@ public class ArmSystem : MonoBehaviour {
 
 	void LowerArm(GameObject arm) {
 		if (arm == leftArm) {
-            trafficControl.SetOriginLane(TrafficLane.None);
+            trafficControl.SetOriginLane(_intersection, TrafficLane.None);
 			heldKeyLeft = null;
 			leftRaised = false;
 		}
 		else {
-            trafficControl.SetDestinationLane(TrafficLane.None);
+            trafficControl.SetDestinationLane(_intersection, TrafficLane.None);
 			heldKeyRight = null;
 		}
 		iTween.MoveTo (arm, iTween.Hash ("position", loweredPosition,
