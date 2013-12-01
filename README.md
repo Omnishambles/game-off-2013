@@ -1,8 +1,8 @@
-## The Heroic Traffic Changer’s Glorious Dedication to Dear Leader
+## The Heroic Traffic Changer’s Glorious Dedication to Best Leader
 
 ### Synopsis
 
-The game is set at two busy intersections in bustling Pyongyang. The player assumes control of two fresh new recruits to the prestigious People’s Department of Changing Traffic for Korean Honour, both looking to impress Dear Leader with their unwavering ability to redirect the flow of traffic. Failure is unacceptable. 
+The game is set at two busy intersections in the bustling People's Capital. The player assumes control of two fresh new recruits to the prestigious People’s Department of Changing Traffic for National Honour, both looking to impress Best Leader with their unwavering ability to redirect the flow of traffic. Failure is unacceptable.
 
 ### Gameplay
 

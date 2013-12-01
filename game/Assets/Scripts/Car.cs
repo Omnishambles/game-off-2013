@@ -63,9 +63,16 @@ public class Car : MonoBehaviour
     }
 	 */
     
-    private void Update()
+    private void Start()
     {
-        if (!_started)
+        _percentAcrossPath = 0.02f;
+        _isMoving = true;
+    }
+
+    private void FixedUpdate()
+    {
+        float moveAmount = this.Traffic.MovementAmountForCar(this);
+        if (moveAmount <= 0.0f)
         {
             if (_initialPath != null)
             {
@@ -82,7 +89,15 @@ public class Car : MonoBehaviour
         else if (_started && !_isMoving)
         {
             iTween.Resume(gameObject);
+            
         }
+    }
+
+    private void carLeave()
+    {
+        this.Traffic.RemoveCar(this);
+        GameObject.Destroy(this.gameObject);
+        Score.updateScore(1);
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -110,8 +125,7 @@ public class Car : MonoBehaviour
         else if (_onFinalPath)
         {
             Debug.Log("Car finished path");
-            this.Traffic.RemoveCar(this);
-            GameObject.Destroy(gameObject);
+            carLeave();
         }
     }
 }
