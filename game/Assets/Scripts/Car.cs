@@ -9,6 +9,7 @@ public class Car : MonoBehaviour
     private Vector3[] _initialPath;
     private Vector3[] _finalPath;
     private bool _onFinalPath;
+    private int _pauseFrameCount;
 
     private string _tweenId;
 
@@ -88,8 +89,13 @@ public class Car : MonoBehaviour
         }
         else if (_started && !_isMoving)
         {
-            iTween.Resume(gameObject);
-            
+            // Resume after 10 frames.
+            _pauseFrameCount++;
+            if (_pauseFrameCount >= 10)
+            {
+                iTween.Resume(gameObject);
+                _pauseFrameCount = 0;
+            }
         }
     }
 
